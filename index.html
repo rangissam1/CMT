@@ -1,0 +1,1269 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CMT | LED Display Solution — CarryMaxTech</title>
+<meta name="description" content="공간의 가치를 빛으로 재정의하는 LED 디스플레이 솔루션 전문 기업, CMT CarryMaxTech">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<!-- Pretendard — 웹 최적화 한글 폰트 (CDN) -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>
+
+/* ══════════════════════════════════════
+   TOKENS
+══════════════════════════════════════ */
+:root {
+  --black:        #08080b;
+  --dark:         #0e0e14;
+  --panel:        #13131a;
+  --panel2:       #18181f;
+  --border:       #222230;
+  --border-hi:    #3a3a55;
+
+  --blue:         #3d74c4;
+  --blue-bright:  #5b9de8;
+  --blue-dim:     #1e3d72;
+  --blue-glow:    rgba(91,157,232,0.18);
+  --blue-line:    rgba(91,157,232,0.35);
+
+  --white:        #eeeef5;
+  --grey:         #7878a0;
+  --grey-mid:     #9898b8;
+  --accent:       #b8ccf0;
+
+  --nav-h:        68px;
+  --max-w:        1360px;
+  --pad-x:        clamp(20px, 5vw, 64px);
+  --section-py:   clamp(80px, 10vh, 140px);
+}
+
+/* ══════════════════════════════════════
+   RESET & BASE
+══════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; font-size: 17px; }
+body {
+  background: var(--black);
+  color: var(--white);
+  font-family: 'Pretendard Variable', Pretendard, 'Apple SD Gothic Neo',
+               'Noto Sans KR', 'Malgun Gothic', sans-serif;
+  font-weight: 300;
+  word-break: keep-all;
+  overflow-wrap: break-word;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+img { display: block; max-width: 100%; }
+a { color: inherit; text-decoration: none; }
+
+::-webkit-scrollbar { width: 3px; }
+::-webkit-scrollbar-track { background: var(--black); }
+::-webkit-scrollbar-thumb { background: var(--blue-dim); border-radius: 2px; }
+
+/* ══════════════════════════════════════
+   UTILITIES
+══════════════════════════════════════ */
+.mono {
+  font-family: 'Space Mono', monospace;
+}
+.bebas {
+  font-family: 'Bebas Neue', sans-serif;
+}
+.label {
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--blue-bright);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.label::before {
+  content: '';
+  display: block;
+  width: 28px;
+  height: 1px;
+  background: var(--blue-bright);
+  flex-shrink: 0;
+}
+.inner {
+  max-width: var(--max-w);
+  margin: 0 auto;
+  padding: 0 var(--pad-x);
+}
+
+/* ══════════════════════════════════════
+   NOISE OVERLAY  (subtle grain)
+══════════════════════════════════════ */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 9998;
+  opacity: 0.4;
+}
+
+/* ══════════════════════════════════════
+   NAV
+══════════════════════════════════════ */
+#navbar {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 1000;
+  height: var(--nav-h);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--pad-x);
+  background: rgba(8,8,11,0.8);
+  backdrop-filter: blur(24px) saturate(1.6);
+  -webkit-backdrop-filter: blur(24px) saturate(1.6);
+  border-bottom: 1px solid var(--border);
+  transition: background 0.4s, border-color 0.4s;
+}
+#navbar.scrolled {
+  background: rgba(8,8,11,0.97);
+  border-color: var(--border-hi);
+}
+
+.nav-logo img {
+  height: 34px;
+  object-fit: contain;
+  filter: brightness(1.15);
+}
+
+.nav-links {
+  display: flex;
+  gap: 44px;
+  list-style: none;
+}
+.nav-links a {
+  font-family: 'Space Mono', monospace;
+  font-size: 10.5px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--grey);
+  position: relative;
+  padding-bottom: 5px;
+  transition: color 0.25s;
+}
+.nav-links a::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0;
+  width: 0; height: 1px;
+  background: var(--blue-bright);
+  transition: width 0.3s cubic-bezier(0.4,0,0.2,1);
+}
+.nav-links a:hover { color: var(--white); }
+.nav-links a:hover::after { width: 100%; }
+
+/* hamburger */
+.hamburger {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  cursor: pointer;
+  padding: 6px;
+  background: none;
+  border: none;
+}
+.hamburger span {
+  display: block;
+  width: 22px;
+  height: 1.5px;
+  background: var(--white);
+  transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
+  transform-origin: center;
+}
+.hamburger.open span:nth-child(1) { transform: translateY(6.5px) rotate(45deg); }
+.hamburger.open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+.hamburger.open span:nth-child(3) { transform: translateY(-6.5px) rotate(-45deg); }
+
+.mobile-menu {
+  display: none;
+  position: fixed;
+  top: var(--nav-h);
+  left: 0; right: 0;
+  background: rgba(14,14,20,0.98);
+  backdrop-filter: blur(24px);
+  border-bottom: 1px solid var(--border);
+  z-index: 999;
+  padding: 28px var(--pad-x) 36px;
+  flex-direction: column;
+  gap: 0;
+}
+.mobile-menu.open { display: flex; }
+.mobile-menu a {
+  font-family: 'Space Mono', monospace;
+  font-size: 12px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--grey);
+  padding: 18px 0;
+  border-bottom: 1px solid var(--border);
+  transition: color 0.2s, padding-left 0.2s;
+}
+.mobile-menu a:last-child { border-bottom: none; }
+.mobile-menu a:hover { color: var(--blue-bright); padding-left: 8px; }
+
+/* ══════════════════════════════════════
+   HERO
+══════════════════════════════════════ */
+#home {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  padding-top: var(--nav-h);
+  overflow: hidden;
+}
+
+/* full-bleed bg image */
+.hero-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+.hero-bg img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 30%;
+  opacity: 0.22;
+  filter: saturate(0.7);
+}
+/* multi-layer gradient vignette */
+.hero-bg::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(to bottom, rgba(8,8,11,0.5) 0%, transparent 30%, transparent 60%, rgba(8,8,11,0.9) 100%),
+    linear-gradient(to right, rgba(8,8,11,0.95) 30%, rgba(8,8,11,0.2) 80%, transparent 100%);
+}
+
+/* animated perspective grid */
+.hero-grid {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background-image:
+    linear-gradient(rgba(91,157,232,0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(91,157,232,0.045) 1px, transparent 1px);
+  background-size: 72px 72px;
+  animation: gridDrift 28s linear infinite;
+  transform-origin: center bottom;
+}
+@keyframes gridDrift {
+  0%   { background-position: 0 0; }
+  100% { background-position: 72px 72px; }
+}
+
+/* blue radial bloom */
+.hero-bloom {
+  position: absolute;
+  right: -5%;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 60vw;
+  height: 60vw;
+  max-width: 900px;
+  max-height: 900px;
+  background: radial-gradient(circle, rgba(61,116,196,0.12) 0%, transparent 65%);
+  z-index: 1;
+  pointer-events: none;
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  padding: 0 var(--pad-x);
+  max-width: calc(var(--max-w) + var(--pad-x)*2);
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 48px;
+}
+
+/* text side */
+.hero-text { flex: 1; min-width: 0; }
+
+.hero-eyebrow {
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.3em;
+  color: var(--blue-bright);
+  text-transform: uppercase;
+  margin-bottom: 28px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  opacity: 0;
+  animation: revealUp 0.8s ease 0.1s both;
+}
+.hero-eyebrow::before {
+  content: '';
+  display: block;
+  width: 40px;
+  height: 1px;
+  background: var(--blue-bright);
+}
+
+.hero-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 28px;
+  opacity: 0;
+  animation: revealUp 0.8s ease 0.2s both;
+}
+.hero-tag {
+  font-family: 'Space Mono', monospace;
+  font-size: 9.5px;
+  letter-spacing: 0.22em;
+  color: var(--blue-bright);
+  border: 1px solid var(--blue-line);
+  padding: 5px 13px;
+  background: rgba(91,157,232,0.06);
+  text-transform: uppercase;
+}
+
+.hero-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(70px, 10.5vw, 154px);
+  line-height: 0.9;
+  letter-spacing: 0.02em;
+  color: var(--white);
+  opacity: 0;
+  animation: revealUp 0.9s ease 0.3s both;
+}
+.hero-title .hl {
+  color: var(--blue-bright);
+  display: block;
+  /* subtle text glow */
+  text-shadow: 0 0 80px rgba(91,157,232,0.35);
+}
+
+.hero-sub {
+  margin-top: 28px;
+  font-size: 16.5px;
+  color: var(--grey-mid);
+  line-height: 2;
+  max-width: 420px;
+  opacity: 0;
+  animation: revealUp 0.9s ease 0.45s both;
+}
+
+.hero-cta {
+  margin-top: 44px;
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  opacity: 0;
+  animation: revealUp 0.9s ease 0.6s both;
+}
+.btn {
+  font-family: 'Space Mono', monospace;
+  font-size: 10.5px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  padding: 14px 30px;
+  cursor: pointer;
+  border: none;
+  transition: all 0.28s cubic-bezier(0.4,0,0.2,1);
+  position: relative;
+  overflow: hidden;
+}
+.btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(255,255,255,0.06);
+  transform: translateX(-110%) skewX(-20deg);
+  transition: transform 0.4s ease;
+}
+.btn:hover::before { transform: translateX(120%) skewX(-20deg); }
+.btn-solid {
+  background: var(--blue-bright);
+  color: var(--black);
+}
+.btn-solid:hover { background: var(--accent); transform: translateY(-3px); box-shadow: 0 12px 32px rgba(91,157,232,0.3); }
+.btn-ghost {
+  background: transparent;
+  color: var(--blue-bright);
+  border: 1px solid var(--blue-line);
+}
+.btn-ghost:hover { background: rgba(91,157,232,0.1); transform: translateY(-3px); border-color: var(--blue-bright); }
+
+/* image side */
+.hero-visual {
+  flex: 0 0 clamp(260px, 32vw, 440px);
+  opacity: 0;
+  animation: revealFade 1.2s ease 0.5s both;
+}
+.hero-visual img {
+  width: 100%;
+  filter: drop-shadow(0 24px 64px rgba(61,116,196,0.35)) drop-shadow(0 4px 16px rgba(0,0,0,0.6));
+}
+
+/* scroll indicator */
+.scroll-cue {
+  position: absolute;
+  bottom: 36px;
+  left: var(--pad-x);
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-family: 'Space Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--grey);
+  opacity: 0;
+  animation: revealFade 1s ease 1.2s both;
+}
+.scroll-track {
+  width: 50px;
+  height: 1px;
+  background: var(--border);
+  overflow: hidden;
+  position: relative;
+}
+.scroll-track::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--blue-bright);
+  transform-origin: left;
+  animation: scanLine 2.4s ease-in-out infinite;
+}
+@keyframes scanLine {
+  0%   { transform: scaleX(0); transform-origin: left; }
+  50%  { transform: scaleX(1); transform-origin: left; }
+  50.01% { transform-origin: right; }
+  100% { transform: scaleX(0); transform-origin: right; }
+}
+
+/* ══════════════════════════════════════
+   SECTION SHARED
+══════════════════════════════════════ */
+section { padding: var(--section-py) 0; }
+
+.sec-head {
+  margin-bottom: clamp(48px, 7vh, 80px);
+}
+.section-title-xl {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(44px, 5.5vw, 76px);
+  line-height: 1;
+  letter-spacing: 0.04em;
+  margin-top: 14px;
+}
+
+/* reveal animation */
+.reveal {
+  opacity: 0;
+  transform: translateY(32px);
+  transition: opacity 0.75s cubic-bezier(0.4,0,0.2,1), transform 0.75s cubic-bezier(0.4,0,0.2,1);
+}
+.reveal.on { opacity: 1; transform: none; }
+.reveal-delay-1 { transition-delay: 0.1s; }
+.reveal-delay-2 { transition-delay: 0.2s; }
+.reveal-delay-3 { transition-delay: 0.32s; }
+.reveal-delay-4 { transition-delay: 0.44s; }
+
+/* ══════════════════════════════════════
+   ABOUT
+══════════════════════════════════════ */
+#about {
+  background: var(--dark);
+  position: relative;
+  overflow: hidden;
+}
+/* subtle corner accent */
+#about::before {
+  content: '';
+  position: absolute;
+  top: 0; right: 0;
+  width: 40vw;
+  height: 40vw;
+  max-width: 600px;
+  max-height: 600px;
+  background: radial-gradient(circle at top right, rgba(61,116,196,0.07) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+.about-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(40px, 7vw, 96px);
+  align-items: start;
+}
+
+/* left col */
+.about-quote {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(26px, 3.2vw, 46px);
+  line-height: 1.12;
+  color: var(--blue-bright);
+  border-left: 3px solid var(--blue);
+  padding-left: 24px;
+  margin: 20px 0 32px;
+}
+
+.about-body {
+  font-size: 16px;
+  line-height: 2.1;
+  color: #9898b8;
+}
+
+/* right col — competencies */
+.competency-list { margin-top: 8px; }
+.competency-item {
+  border-top: 1px solid var(--border);
+  padding: 26px 0;
+  display: grid;
+  grid-template-columns: 36px 1fr;
+  gap: 20px;
+  align-items: start;
+  transition: border-color 0.25s;
+}
+.competency-item:hover { border-color: var(--blue-line); }
+.c-num {
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  color: var(--blue);
+  padding-top: 2px;
+}
+.c-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--white);
+  margin-bottom: 8px;
+  letter-spacing: 0.01em;
+}
+.c-desc {
+  font-size: 14.5px;
+  color: var(--grey);
+  line-height: 1.95;
+}
+
+/* ══════════════════════════════════════
+   PRODUCTS
+══════════════════════════════════════ */
+#products { background: var(--black); }
+
+/* category wrapper */
+.product-cat {
+  margin-bottom: clamp(72px, 10vh, 112px);
+}
+.cat-header {
+  display: flex;
+  align-items: baseline;
+  gap: 18px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 36px;
+}
+.cat-num {
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  color: var(--blue);
+}
+.cat-name {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(24px, 3vw, 34px);
+  letter-spacing: 0.06em;
+}
+
+/* ── common spec bar ── */
+.spec-bar {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  padding: 18px 24px;
+  margin-bottom: 36px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 28px;
+}
+.spec-chip {
+  font-family: 'Space Mono', monospace;
+  font-size: 10.5px;
+  color: var(--grey);
+  white-space: nowrap;
+}
+.spec-chip b { color: var(--blue-bright); }
+
+/* ── units grid ── */
+.units-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+
+.unit-card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  overflow: hidden;
+  cursor: default;
+  transition: border-color 0.3s, transform 0.35s cubic-bezier(0.4,0,0.2,1),
+              box-shadow 0.35s;
+  position: relative;
+}
+/* sheen on hover */
+.unit-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(91,157,232,0.07) 0%, transparent 60%);
+  opacity: 0;
+  transition: opacity 0.3s;
+  pointer-events: none;
+}
+.unit-card:hover {
+  border-color: var(--blue);
+  transform: translateY(-6px);
+  box-shadow: 0 20px 48px rgba(61,116,196,0.18);
+}
+.unit-card:hover::before { opacity: 1; }
+
+.unit-img-wrap {
+  width: 100%;
+  aspect-ratio: 3/4;
+  background: #0c0c12;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.unit-img-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  transition: transform 0.4s ease;
+}
+.unit-card:hover .unit-img-wrap img { transform: scale(1.04); }
+
+.unit-info {
+  padding: 18px 20px 22px;
+  border-top: 1px solid var(--border);
+}
+.unit-name {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 22px;
+  letter-spacing: 0.1em;
+  color: var(--blue-bright);
+  margin-bottom: 8px;
+}
+.unit-size {
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  color: var(--grey);
+  line-height: 1.75;
+}
+.unit-size em { color: var(--blue); font-style: normal; }
+
+/* ── single product card ── */
+.product-single {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  overflow: hidden;
+  transition: border-color 0.3s;
+}
+.product-single:hover { border-color: var(--blue); }
+
+.ps-media {
+  background: #0b0b11;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px;
+  border-right: 1px solid var(--border);
+  overflow: hidden;
+}
+.ps-media img {
+  width: 100%;
+  max-height: 320px;
+  object-fit: contain;
+  transition: transform 0.4s ease;
+}
+.product-single:hover .ps-media img { transform: scale(1.04); }
+
+.ps-info {
+  padding: clamp(28px, 4vw, 48px);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.ps-label {
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  color: var(--blue-bright);
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+.ps-model {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(28px, 3.5vw, 44px);
+  letter-spacing: 0.06em;
+  margin-bottom: 28px;
+}
+
+.spec-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.spec-table tr {
+  border-bottom: 1px solid var(--border);
+}
+.spec-table tr:last-child { border-bottom: none; }
+.spec-table td {
+  padding: 10px 0;
+  font-size: 14.5px;
+  line-height: 1.7;
+  vertical-align: top;
+}
+.spec-table td:first-child {
+  font-family: 'Space Mono', monospace;
+  font-size: 10.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--grey);
+  width: 44%;
+  padding-right: 14px;
+}
+.spec-table td:last-child { color: var(--white); }
+
+/* ══════════════════════════════════════
+   CONTACT
+══════════════════════════════════════ */
+#contact {
+  background: var(--dark);
+  position: relative;
+  overflow: hidden;
+}
+/* diagonal separator line */
+#contact::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--border-hi), transparent);
+}
+
+.contact-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(40px, 7vw, 96px);
+  align-items: center;
+}
+
+.contact-headline {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(52px, 7vw, 104px);
+  line-height: 0.92;
+  letter-spacing: 0.02em;
+  margin: 16px 0 24px;
+}
+.contact-headline span {
+  color: var(--blue-bright);
+  display: block;
+}
+.contact-body {
+  font-size: 16px;
+  color: var(--grey);
+  line-height: 2;
+}
+
+.contact-card {
+  background: var(--panel2);
+  border: 1px solid var(--border);
+  padding: clamp(28px, 5vw, 52px);
+  position: relative;
+  overflow: hidden;
+}
+/* top blue accent stripe */
+.contact-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--blue-dim), var(--blue-bright), var(--blue-dim));
+}
+.contact-email-label {
+  font-family: 'Space Mono', monospace;
+  font-size: 9.5px;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  color: var(--grey);
+  margin-bottom: 18px;
+}
+.contact-email-link {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(20px, 2.8vw, 34px);
+  letter-spacing: 0.05em;
+  color: var(--blue-bright);
+  text-decoration: none;
+  word-break: break-all;
+  transition: color 0.25s;
+  display: block;
+  margin-bottom: 32px;
+}
+.contact-email-link:hover { color: var(--accent); }
+
+.contact-divider {
+  height: 1px;
+  background: var(--border);
+  margin-bottom: 28px;
+}
+.contact-note {
+  font-size: 15px;
+  color: var(--grey);
+  line-height: 1.9;
+}
+
+/* ══════════════════════════════════════
+   FOOTER
+══════════════════════════════════════ */
+footer {
+  padding: 28px var(--pad-x);
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+footer img {
+  height: 26px;
+  filter: brightness(0.5);
+}
+footer p {
+  font-family: 'Space Mono', monospace;
+  font-size: 9.5px;
+  letter-spacing: 0.14em;
+  color: var(--border-hi);
+}
+
+/* ══════════════════════════════════════
+   KEYFRAMES
+══════════════════════════════════════ */
+@keyframes revealUp {
+  from { opacity: 0; transform: translateY(22px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes revealFade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ══════════════════════════════════════
+   RESPONSIVE
+══════════════════════════════════════ */
+
+/* ─ 1200px ─ */
+@media (max-width: 1200px) {
+  .units-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* ─ 1024px ─ */
+@media (max-width: 1024px) {
+  .about-grid { grid-template-columns: 1fr; gap: 56px; }
+  .contact-grid { grid-template-columns: 1fr; }
+  .product-single { grid-template-columns: 1fr; }
+  .ps-media { border-right: none; border-bottom: 1px solid var(--border); }
+  .hero-visual { display: none; }
+}
+
+/* ─ 768px ─ */
+@media (max-width: 768px) {
+  #navbar { padding: 0 20px; }
+  .nav-links { display: none; }
+  .hamburger { display: flex; }
+  section { padding: clamp(56px, 8vh, 88px) 0; }
+  .units-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  footer { padding: 24px 20px; }
+}
+
+/* ─ 480px ─ */
+@media (max-width: 480px) {
+  .hero-title { font-size: clamp(60px, 18vw, 90px); }
+  .units-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .spec-bar { flex-direction: column; gap: 8px; }
+  .product-single { grid-template-columns: 1fr; }
+  .ps-media { padding: 28px; }
+}
+
+</style>
+</head>
+<body>
+
+<!-- ══ NAV ══ -->
+<nav id="navbar">
+  <a class="nav-logo" href="#home">
+    <img src="assets/cmt-logo.png" alt="CMT CarryMaxTech">
+  </a>
+  <ul class="nav-links">
+    <li><a href="#about">About Us</a></li>
+    <li><a href="#products">Products</a></li>
+    <li><a href="#contact">Contact Us</a></li>
+  </ul>
+  <button class="hamburger" id="hamburger" aria-label="메뉴">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<div class="mobile-menu" id="mobileMenu">
+  <a href="#about"   onclick="closeMob()">About Us</a>
+  <a href="#products" onclick="closeMob()">Products</a>
+  <a href="#contact" onclick="closeMob()">Contact Us</a>
+</div>
+
+
+<!-- ══ HERO ══ -->
+<section id="home">
+  <div class="hero-bg">
+    <img src="assets/main-led-display.png" alt="CMT LED Display Installation">
+  </div>
+  <div class="hero-grid"></div>
+  <div class="hero-bloom"></div>
+
+  <div class="hero-content">
+    <div class="hero-text">
+      <p class="hero-eyebrow">CMT LED Display Solution</p>
+      <div class="hero-tags">
+        <span class="hero-tag">공간</span>
+        <span class="hero-tag">연출</span>
+        <span class="hero-tag">멀티</span>
+        <span class="hero-tag">확장</span>
+      </div>
+      <h1 class="hero-title">
+        SPACE
+        <span class="hl">DISPLAY</span>
+        MULTI
+        <span class="hl">EXPANSION</span>
+      </h1>
+      <p class="hero-sub">
+        LED 디스플레이와 공간 디자인, 미디어 기술을 결합해<br>
+        새로운 시각 경험을 만드는 디스플레이 전문 기업
+      </p>
+      <div class="hero-cta">
+        <a href="#products" class="btn btn-solid">제품 보기</a>
+        <a href="#about"    class="btn btn-ghost">회사 소개</a>
+      </div>
+    </div>
+
+    <div class="hero-visual">
+      <img src="assets/product-1unit.png" alt="CMT 1-UNIT LED Display">
+    </div>
+  </div>
+
+  <div class="scroll-cue">
+    <div class="scroll-track"></div>
+    Scroll
+  </div>
+</section>
+
+
+<!-- ══ ABOUT ══ -->
+<section id="about">
+  <div class="inner">
+    <div class="about-grid">
+
+      <!-- left -->
+      <div>
+        <div class="label reveal">About Us</div>
+        <div class="about-quote reveal reveal-delay-1">
+          "공간의 가치를 빛으로 재정의하다, — CMT"
+        </div>
+        <p class="about-body reveal reveal-delay-2">
+          저희 CMT는 단순한 LED 전광판 제조를 넘어, 첨단 기술과 감각적인 공간 디자인을
+          결합하여 새로운 시각적 경험을 설계하는 혁신 스타트업 기업입니다. 유연한 사고와
+          과감한 기술 개발을 통해 고객의 공간이 가진 잠재력을 극대화합니다.
+        </p>
+      </div>
+
+      <!-- right -->
+      <div>
+        <div class="label reveal">Core Competencies</div>
+        <div class="section-title-xl reveal reveal-delay-1" style="margin-bottom:12px;">핵심 역량</div>
+        <div class="competency-list">
+          <div class="competency-item reveal reveal-delay-2">
+            <span class="c-num">01</span>
+            <div>
+              <div class="c-title">공간 맞춤형 디스플레이 솔루션</div>
+              <p class="c-desc">단순히 화면을 설치하는 것이 아니라, 건축물과 인테리어의 특성을 분석하여 공간의 일부처럼 녹아드는 최적화된 하드웨어를 설계합니다.</p>
+            </div>
+          </div>
+          <div class="competency-item reveal reveal-delay-3">
+            <span class="c-num">02</span>
+            <div>
+              <div class="c-title">미디어 아트 및 인터랙티브 기술</div>
+              <p class="c-desc">공간 디자인에 필요한 센싱 기술과 콘텐츠를 개발하여, 사용자와 소통하고 반응하는 살아있는 미디어 월(Media Wall)을 구현합니다.</p>
+            </div>
+          </div>
+          <div class="competency-item reveal reveal-delay-4">
+            <span class="c-num">03</span>
+            <div>
+              <div class="c-title">고해상도·초경량 하드웨어</div>
+              <p class="c-desc">최신 소재와 초미세 피치 기술을 적용하여 선명한 화질은 물론, 시공의 편의성과 심미성을 모두 만족시킵니다.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- ══ PRODUCTS ══ -->
+<section id="products">
+  <div class="inner">
+
+    <div class="sec-head">
+      <div class="label reveal">Products</div>
+      <h2 class="section-title-xl reveal reveal-delay-1">PRODUCT LINE</h2>
+    </div>
+
+    <!-- ── 01 LED 영상 디스플레이 ── -->
+    <div class="product-cat">
+      <div class="cat-header reveal">
+        <span class="cat-num">01</span>
+        <span class="cat-name">LED 영상 디스플레이</span>
+      </div>
+
+      <div class="spec-bar reveal reveal-delay-1">
+        <span class="spec-chip"><b>픽셀간격</b> 1.86 mm</span>
+        <span class="spec-chip"><b>표면표출방식</b> GOB</span>
+        <span class="spec-chip"><b>인터페이스</b> RJ45 · WiFi · USB · HDMI</span>
+        <span class="spec-chip"><b>내장스피커</b> 50×12 mm × 2PCS</span>
+      </div>
+
+      <div class="units-grid">
+        <div class="unit-card reveal reveal-delay-1">
+          <div class="unit-img-wrap">
+            <img src="assets/product-1unit.png" alt="1-UNIT LED Display">
+          </div>
+          <div class="unit-info">
+            <div class="unit-name">1-UNIT</div>
+            <div class="unit-size">
+              W 960 × H 1920 mm<br>
+              전체 높이 2470 mm<br>
+              <em>받침대 550 mm</em>
+            </div>
+          </div>
+        </div>
+
+        <div class="unit-card reveal reveal-delay-2">
+          <div class="unit-img-wrap">
+            <img src="assets/product-2unit.png" alt="2-UNIT LED Display">
+          </div>
+          <div class="unit-info">
+            <div class="unit-name">2-UNIT</div>
+            <div class="unit-size">
+              W 1920 × H 1920 mm<br>
+              전체 높이 2470 mm<br>
+              <em>받침대 550 mm</em>
+            </div>
+          </div>
+        </div>
+
+        <div class="unit-card reveal reveal-delay-3">
+          <div class="unit-img-wrap">
+            <img src="assets/product-3unit.png" alt="3-UNIT LED Display">
+          </div>
+          <div class="unit-info">
+            <div class="unit-name">3-UNIT</div>
+            <div class="unit-size">
+              W 2880 × H 1920 mm<br>
+              전체 높이 2470 mm<br>
+              <em>받침대 550 mm</em>
+            </div>
+          </div>
+        </div>
+
+        <div class="unit-card reveal reveal-delay-4">
+          <div class="unit-img-wrap">
+            <img src="assets/product-4unit.png" alt="4-UNIT LED Display">
+          </div>
+          <div class="unit-info">
+            <div class="unit-name">4-UNIT</div>
+            <div class="unit-size">
+              W 1920 × H 1920 mm<br>
+              전체 높이 2470 mm<br>
+              <em>받침대 550 mm</em>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div><!-- /product-cat 01 -->
+
+
+    <!-- ── 02 영상회의시스템 ── -->
+    <div class="product-cat">
+      <div class="cat-header reveal">
+        <span class="cat-num">02</span>
+        <span class="cat-name">영상회의시스템</span>
+      </div>
+      <div class="product-single reveal reveal-delay-1">
+        <div class="ps-media">
+          <img src="assets/video-conference-system.png" alt="영상회의시스템 JT-20.4K">
+        </div>
+        <div class="ps-info">
+          <p class="ps-label">Video Conference System</p>
+          <div class="ps-model">JT-20.4K</div>
+          <table class="spec-table">
+            <tr><td>카메라 해상도</td><td>4096 × 2160 (4K)</td></tr>
+            <tr><td>시야각</td><td>71°</td></tr>
+            <tr><td>줌</td><td>16배 줌</td></tr>
+            <tr><td>스피커 출력</td><td>55 dB</td></tr>
+            <tr><td>마이크</td><td>최적사용거리 없음</td></tr>
+            <tr><td>제품 크기</td><td>200 × 177 × 165 mm</td></tr>
+            <tr><td>제품 무게</td><td>1.76 kg</td></tr>
+            <tr><td>시스템 요구사항</td><td>Windows 10 이상</td></tr>
+          </table>
+        </div>
+      </div>
+    </div><!-- /product-cat 02 -->
+
+
+    <!-- ── 03 AV 스위쳐 ── -->
+    <div class="product-cat">
+      <div class="cat-header reveal">
+        <span class="cat-num">03</span>
+        <span class="cat-name">AV 스위쳐</span>
+      </div>
+      <div class="product-single reveal reveal-delay-1">
+        <div class="ps-media">
+          <img src="assets/av-switcher.png" alt="AV 스위쳐 PN-4040">
+        </div>
+        <div class="ps-info">
+          <p class="ps-label">AV Switcher</p>
+          <div class="ps-model">PN-4040</div>
+          <table class="spec-table">
+            <tr><td>종류</td><td>AV 스위쳐 (매트릭스 스위쳐)</td></tr>
+            <tr><td>입출력</td><td>4in / 4out</td></tr>
+            <tr><td>용도</td><td>4K HDMI 스위쳐</td></tr>
+            <tr><td>신호 종류</td><td>HDMI</td></tr>
+            <tr><td>신호 방식</td><td>HDMI Seamless</td></tr>
+            <tr><td>외형 크기</td><td>440 × 203 × 44 mm</td></tr>
+            <tr><td>사용 전압</td><td>DC 12V 어댑터</td></tr>
+            <tr><td>무게</td><td>2.2 kg</td></tr>
+          </table>
+        </div>
+      </div>
+    </div><!-- /product-cat 03 -->
+
+  </div>
+</section>
+
+
+<!-- ══ CONTACT ══ -->
+<section id="contact">
+  <div class="inner">
+    <div class="contact-grid">
+
+      <div>
+        <div class="label reveal">Contact Us</div>
+        <div class="contact-headline reveal reveal-delay-1">
+          GET IN
+          <span>TOUCH</span>
+        </div>
+        <p class="contact-body reveal reveal-delay-2">
+          공간에 맞는 LED 디스플레이 구성,<br>
+          제품 사양, 설치 방향을 상담해드립니다.<br>
+          CMT팀이 빠르게 답변드리겠습니다.
+        </p>
+      </div>
+
+      <div class="contact-card reveal reveal-delay-2">
+        <p class="contact-email-label">이메일 문의</p>
+        <a class="contact-email-link" href="mailto:carrymaxtech@gmail.com">
+          carrymaxtech@gmail.com
+        </a>
+        <div class="contact-divider"></div>
+        <p class="contact-note">
+          제품 문의, 솔루션 상담, 파트너십 등<br>
+          어떤 내용이든 편하게 연락 주세요.
+        </p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- ══ FOOTER ══ -->
+<footer>
+  <img src="assets/cmt-logo.png" alt="CMT">
+  <p>© 2025 CarryMaxTech Co., Ltd. · (주)캐리맥스테크 · LED Display Solution</p>
+</footer>
+
+
+<script>
+/* ── Hamburger ── */
+const ham = document.getElementById('hamburger');
+const mob = document.getElementById('mobileMenu');
+ham.addEventListener('click', () => {
+  ham.classList.toggle('open');
+  mob.classList.toggle('open');
+});
+function closeMob() {
+  ham.classList.remove('open');
+  mob.classList.remove('open');
+}
+
+/* ── Scroll-reveal ── */
+const io = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.classList.add('on');
+      io.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.08 });
+document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+/* ── Nav scroll state ── */
+const nav = document.getElementById('navbar');
+window.addEventListener('scroll', () => {
+  nav.classList.toggle('scrolled', window.scrollY > 60);
+}, { passive: true });
+
+/* ── Close mobile menu on resize ── */
+window.addEventListener('resize', () => {
+  if (window.innerWidth > 768) closeMob();
+}, { passive: true });
+
+/* ── Smooth-scroll for anchor links ── */
+document.querySelectorAll('a[href^="#"]').forEach(link => {
+  link.addEventListener('click', e => {
+    const target = document.querySelector(link.getAttribute('href'));
+    if (!target) return;
+    e.preventDefault();
+    const offset = 68; // nav height
+    const top = target.getBoundingClientRect().top + window.scrollY - offset;
+    window.scrollTo({ top, behavior: 'smooth' });
+  });
+});
+</script>
+</body>
+</html>
