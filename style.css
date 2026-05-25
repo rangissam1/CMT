@@ -1026,7 +1026,7 @@ section { padding: var(--section-py) 0; }
 }
 .contact-email-link {
   font-family: 'Arial','Bebas Neue', sans-serif;
-  font-size: clamp(20px, 2.8vw, 28px);
+  font-size: clamp(18px, 2.8vw, 28px);
   letter-spacing: 0.05em;
   color: var(--blue-bright);
   text-decoration: none;
